@@ -1,11 +1,13 @@
 import './App.scss';
-import back from './cards/back.svg'
-import QH from './cards/QH.svg'
-import KH from './cards/KH.svg'
-import JH from './cards/JH.svg'
-import H10 from './cards/10H.svg'
-import { useState } from 'react';
-import Card from './card'
+import QH from './cards/QH.svg';
+import KH from './cards/KH.svg';
+import JH from './cards/JH.svg';
+import H10 from './cards/10H.svg';
+import { useState, useEffect } from 'react';
+import socketIOClient from 'socket.io-client';
+import Card from './card';
+
+const ENDPOINT = "http://localhost:4001";
 
 function App() {
     let uniqueCards = [
@@ -31,6 +33,16 @@ function App() {
         }
     ]
     const [cards, setCards] = useState(uniqueCards);
+    const [response, setResponse] = useState("");
+
+    useEffect(() => {
+        const socket = socketIOClient(ENDPOINT);
+        socket.on("FromAPI", data => {
+            setResponse(data);
+        });
+
+        return () => socket.disconnect();
+    }, []);
 
     const handleCardClick = () => {
         // not implemented
@@ -40,6 +52,9 @@ function App() {
         <div className="App">
             <header className="App-header">
             </header>
+            <p>
+                It's <time dateTime={response}>{response}</time>
+            </p>
             <div className="container">
                 {cards.map((card, index) => {
                     return (
