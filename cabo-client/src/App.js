@@ -8,6 +8,7 @@ import socketIOClient from 'socket.io-client';
 import Card from './card';
 
 const ENDPOINT = "http://localhost:4001";
+export const socket = socketIOClient(ENDPOINT);
 
 function App() {
     let uniqueCards = [
@@ -36,17 +37,12 @@ function App() {
     const [response, setResponse] = useState("");
 
     useEffect(() => {
-        const socket = socketIOClient(ENDPOINT);
         socket.on("FromAPI", data => {
             setResponse(data);
         });
 
         return () => socket.disconnect();
     }, []);
-
-    const handleCardClick = () => {
-        // not implemented
-    }
 
     return (
         <div className="App">
@@ -62,7 +58,6 @@ function App() {
                             key={index}
                             card={card}
                             index={index}
-                            onClick={handleCardClick}
                         />
                     )
                 })}

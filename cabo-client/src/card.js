@@ -1,17 +1,32 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react';
 import classnames from 'classnames'
 import './card.scss'
 import back from './cards/back.svg'
-import { createReadStream } from 'fs';
+import { socket } from './App.js'
 
-const Card = ({ onClick, card, index }) => {
+const Card = ({ card, index }) => {
     let [isFlipped, setFlipped] = useState(false);
 
     const handleClick = () => {
-        onClick();
+        socket.emit("FlipCard", index, socket.id);
+        console.log(`emit card flip index: ${index}`);
         setFlipped(!isFlipped);
     };
+
+    useEffect(() => {
+        socket.on("CardFlipped", rawData => {
+            const data = JSON.parse(rawData);
+            if (data.clientId === socket.id) {
+                // this was the sender
+                return;
+            }
+            if (index === data.cardId) {
+                console.log(`card flipped! index: ${data.cardId}`);
+                setFlipped(flipped => !flipped);
+            }
+        });
+    }, []);
 
     return (
         <div

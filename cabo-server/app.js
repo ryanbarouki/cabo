@@ -17,24 +17,29 @@ const io = socketIo(server, {
 }); // < Interesting!
 
 let interval;
-io.on("connection", socket => {
+io.sockets.on("connection", client => {
     console.log("New client connected");
 
     if (interval) {
         clearInterval(interval);
     }
 
-    interval = setInterval(() => getApiAndEmit(socket), 1000);
-    socket.on('disconnect', () => {
+    client.on("FlipCard", (index, clientId)=> {
+        console.log(`recieved flip update index: ${index}`);
+        io.sockets.emit("CardFlipped", JSON.stringify({cardId: index, clientId: clientId}));
+    });
+
+    interval = setInterval(() => getApiAndEmit(io.sockets), 1000);
+    client.on('disconnect', () => {
         console.log("Client disconnected");
         clearInterval(interval);
     });
 });
 
-const getApiAndEmit = socket => {
+const getApiAndEmit = sockets => {
   const response = new Date();
   // Emitting a new message. Will be consumed by the client
-  socket.emit("FromAPI", response);
+  sockets.emit("FromAPI", response);
 };
 
 server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
