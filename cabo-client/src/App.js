@@ -37,6 +37,18 @@ function App() {
         socket.emit('StartGame');
     }
 
+    const handleDragEnd = (result) => {
+        console.log(result);
+    }
+
+    const handleDragUpdate = (result) => {
+        if (result.destination === null) {
+            return;
+        }
+        
+        console.log(result);
+    }
+
     return (
         <div className="App">
             <header className="App-header">
@@ -47,7 +59,7 @@ function App() {
             <div className="container">
                 {players.map((player, playerIdx) => {
                     return (
-                        <div className="player-container">
+                        <div className={`player-container player-${playerIdx+1}`}>
                             {player.cardImages.map((card, index) => {
                                 return (
                                     <Card

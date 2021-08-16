@@ -31,4 +31,24 @@
     // visibility: hidden;
     opacity: 0;
   }
+
+  &.card-1 {
+    grid-column-start: 1;
+    grid-row-start: 1;
+  }
+
+  &.card-2 {
+    grid-column-start: 2;
+    grid-row-start: 1;
+  }
+
+  &.card-3 {
+    grid-column-start: 1;
+    grid-row-start: 2;
+  }
+
+  &.card-4 {
+    grid-column-start: 2;
+    grid-row-start: 2;
+  }
 }

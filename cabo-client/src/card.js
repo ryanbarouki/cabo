@@ -30,7 +30,7 @@ const Card = ({ card, index }) => {
 
     return (
         <div
-            className={classnames("card", {
+            className={classnames(`card card-${index % 4 + 1}`, {
                 "is-flipped": isFlipped
             })}
             onClick={handleClick}
