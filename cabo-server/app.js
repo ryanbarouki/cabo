@@ -33,7 +33,6 @@ io.sockets.on("connection", client => {
         const shuffledDeck = shuffle(buildDeck());
 
         for (let i = 0; i < io.engine.clientsCount; i++) {
-            console.log(count);
             const player = new Player(shuffledDeck.slice(4*i, 4*i + 4));
             players.push(player);
         }

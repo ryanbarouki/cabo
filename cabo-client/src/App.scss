@@ -48,14 +48,31 @@
     padding: 12px;
     box-shadow: 0 0 4px 4px #DEDEDE; 
     display: grid;
-    grid-template-columns: repeat(16, 1fr);
-    grid-template-rows: repeat(9, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
     justify-items: center;
     align-items: stretch;
     gap: 5px;
     margin: 0 auto;
     width: 1380px;
     height: 1056px;
+    perspective: 100%;
+    max-width:1380px;
+  }
+
+  .player-container {
+    border: 1px solid #DEDEDE;
+    padding: 12px;
+    box-shadow: 0 0 4px 4px #DEDEDE; 
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    justify-items: center;
+    align-items: stretch;
+    gap: 5px;
+    margin: 0 auto;
+    width: 224px;
+    height: 314px;
     perspective: 100%;
     max-width:1380px;
   }

@@ -3,15 +3,13 @@ import { useState, useEffect } from 'react';
 import socketIOClient from 'socket.io-client';
 import Card from './card';
 import { cardImages } from './cards'
-import { shuffle } from './utils'
 
 const ENDPOINT = "http://localhost:4001";
 export const socket = socketIOClient(ENDPOINT);
 
 function App() {
-    const cardArray = shuffle(Object.values(cardImages));
-    const [cards, setCards] = useState([]); 
     const [response, setResponse] = useState("");
+    const [players, setPlayers] = useState([]);
 
     useEffect(() => {
         socket.on("FromAPI", data => {
@@ -21,15 +19,15 @@ function App() {
         socket.on('DealCards', rawPlayers => {
             const players = JSON.parse(rawPlayers);
             
-            let images = [];
             for (const player of players) {
                 const playerCards = player.cards;
+                player.cardImages = [];
                 for (const card of playerCards) {
-                    images.push(cardImages[card]);
+                    player.cardImages.push(cardImages[card]);
                 }
             }
 
-            setCards(images);
+            setPlayers(players);
         });
 
         return () => socket.disconnect();
@@ -47,13 +45,19 @@ function App() {
                 It's <time dateTime={response}>{response}</time>
             </p>
             <div className="container">
-                {cards.map((card, index) => {
+                {players.map((player, playerIdx) => {
                     return (
-                        <Card
-                            key={index}
-                            card={card}
-                            index={index}
-                        />
+                        <div className="player-container">
+                            {player.cardImages.map((card, index) => {
+                                return (
+                                    <Card
+                                        key={index}
+                                        card={card}
+                                        index={`${playerIdx}${index}`}
+                                    />
+                                )
+                            })}
+                        </div>
                     )
                 })}
                 <button onClick={handleStartGame}>Start Game</button>
