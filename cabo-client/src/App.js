@@ -1,39 +1,16 @@
 import './App.scss';
-import QH from './cards/QH.svg';
-import KH from './cards/KH.svg';
-import JH from './cards/JH.svg';
-import H10 from './cards/10H.svg';
 import { useState, useEffect } from 'react';
 import socketIOClient from 'socket.io-client';
 import Card from './card';
+import { cardImages } from './cards'
+import { shuffle } from './utils'
 
 const ENDPOINT = "http://localhost:4001";
 export const socket = socketIOClient(ENDPOINT);
 
 function App() {
-    let uniqueCards = [
-        {
-            number: "Q",
-            suit: "H", 
-            image: QH
-        },
-        {
-            number: "K",
-            suit: "H", 
-            image: KH
-        },
-        {
-            number: "J",
-            suit: "H", 
-            image: JH
-        },
-        {
-            number: "10",
-            suit: "H", 
-            image: H10
-        }
-    ]
-    const [cards, setCards] = useState(uniqueCards);
+    const cardArray = shuffle(Object.values(cardImages));
+    const [cards, setCards] = useState([]); 
     const [response, setResponse] = useState("");
 
     useEffect(() => {
@@ -41,8 +18,26 @@ function App() {
             setResponse(data);
         });
 
+        socket.on('DealCards', rawPlayers => {
+            const players = JSON.parse(rawPlayers);
+            
+            let images = [];
+            for (const player of players) {
+                const playerCards = player.cards;
+                for (const card of playerCards) {
+                    images.push(cardImages[card]);
+                }
+            }
+
+            setCards(images);
+        });
+
         return () => socket.disconnect();
     }, []);
+
+    const handleStartGame = () => {
+        socket.emit('StartGame');
+    }
 
     return (
         <div className="App">
@@ -61,6 +56,7 @@ function App() {
                         />
                     )
                 })}
+                <button onClick={handleStartGame}>Start Game</button>
             </div>
         </div>
     );

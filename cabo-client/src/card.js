@@ -11,7 +11,7 @@ const Card = ({ card, index }) => {
     const handleClick = () => {
         socket.emit("FlipCard", index, socket.id);
         console.log(`emit card flip index: ${index}`);
-        setFlipped(!isFlipped);
+        setFlipped(!isFlipped); // maybe don't need this here and avoids the workaround
     };
 
     useEffect(() => {
@@ -36,7 +36,7 @@ const Card = ({ card, index }) => {
             onClick={handleClick}
         >
             <div className="card-face card-front-face">
-                <img src={card.image} alt="card" />
+                <img src={card} alt="card" />
             </div>
             <div className="card-face card-back-face">
                 <img src={back} alt="card" />

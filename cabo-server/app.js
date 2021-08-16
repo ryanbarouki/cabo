@@ -1,6 +1,9 @@
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
+const Player = require('./player');
+const Card = require('./card');
+const { shuffle, buildDeck } = require('./utils')
 
 const PORT = process.env.PORT || 4001;
 const index = require("./routes/index");
@@ -20,9 +23,23 @@ let interval;
 io.sockets.on("connection", client => {
     console.log("New client connected");
 
+
+    const players = [];
     if (interval) {
         clearInterval(interval);
     }
+    
+    client.on("StartGame", () => {
+        const shuffledDeck = shuffle(buildDeck());
+
+        for (let i = 0; i < io.engine.clientsCount; i++) {
+            console.log(count);
+            const player = new Player(shuffledDeck.slice(4*i, 4*i + 4));
+            players.push(player);
+        }
+
+        io.sockets.emit("DealCards", JSON.stringify(players))
+    })
 
     client.on("FlipCard", (index, clientId)=> {
         console.log(`recieved flip update index: ${index}`);
