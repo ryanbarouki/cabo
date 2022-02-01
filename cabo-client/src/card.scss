@@ -25,6 +25,17 @@
 
   &.is-flipped {
     transform: rotateY(180deg);
+    &.is-highlighted {
+      transform: rotateY(180deg) translate(0, -10px);
+    }
+  }
+
+  &.is-highlighted {
+    border-color: #f1ffbc;
+    outline: none;
+    border-radius: 7px;
+    box-shadow: 0 0 10px #f1ffbc;
+    transform: translate(0, -10px);
   }
 
   &.is-inactive {

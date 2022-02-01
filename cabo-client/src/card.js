@@ -7,11 +7,21 @@ import { socket } from './App.js'
 
 const Card = ({ card, index }) => {
     let [isFlipped, setFlipped] = useState(false);
+    const [isSelected, setSelected] = useState(false)
+
 
     const handleClick = () => {
         socket.emit("FlipCard", index, socket.id);
         console.log(`emit card flip index: ${index}`);
         setFlipped(!isFlipped); // maybe don't need this here and avoids the workaround
+    };
+
+    const handleMouseEnter = event => {
+        setSelected(true)
+    };
+
+    const handleMouseLeave = event => {
+        setSelected(false)
     };
 
     useEffect(() => {
@@ -31,9 +41,12 @@ const Card = ({ card, index }) => {
     return (
         <div
             className={classnames(`card card-${index % 4 + 1}`, {
-                "is-flipped": isFlipped
+                "is-flipped": isFlipped,
+                "is-highlighted": isSelected
             })}
             onClick={handleClick}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
             <div className="card-face card-front-face">
                 <img src={card} alt="card" />

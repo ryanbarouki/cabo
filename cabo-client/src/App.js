@@ -37,18 +37,6 @@ function App() {
         socket.emit('StartGame');
     }
 
-    const handleDragEnd = (result) => {
-        console.log(result);
-    }
-
-    const handleDragUpdate = (result) => {
-        if (result.destination === null) {
-            return;
-        }
-        
-        console.log(result);
-    }
-
     return (
         <div className="App">
             <header className="App-header">
