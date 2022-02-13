@@ -5,7 +5,7 @@ import './card.scss'
 import back from './cards/back.svg'
 import { socket } from './App.js'
 
-const Card = ({ card, index }) => {
+const Card = ({ cardImage, index, flippedProps }) => {
     let [isFlipped, setFlipped] = useState(false);
     const [isSelected, setSelected] = useState(false)
 
@@ -39,7 +39,7 @@ const Card = ({ card, index }) => {
     }, []);
 
     return (
-        <div
+        <div {...flippedProps}
             className={classnames(`card card-${index % 4 + 1}`, {
                 "is-flipped": isFlipped,
                 "is-highlighted": isSelected
@@ -49,7 +49,7 @@ const Card = ({ card, index }) => {
             onMouseLeave={handleMouseLeave}
         >
             <div className="card-face card-front-face">
-                <img src={card} alt="card" />
+                <img src={cardImage} alt="card" />
             </div>
             <div className="card-face card-back-face">
                 <img src={back} alt="card" />
