@@ -45,10 +45,6 @@ io.sockets.on("connection", client => {
         io.sockets.emit("CardFlipped", JSON.stringify({cardId: index, clientId: clientId}));
     });
 
-    client.on("Swap", (data) => {
-        io.sockets.emit("ShowSwap", data)
-    });
-
     interval = setInterval(() => getApiAndEmit(io.sockets), 1000);
     client.on('disconnect', () => {
         console.log("Client disconnected");
