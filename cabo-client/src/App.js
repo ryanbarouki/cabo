@@ -1,7 +1,7 @@
 import './App.scss';
 import { useState, useEffect } from 'react';
 import socketIOClient from 'socket.io-client';
-import Card from './card';
+import Card from './Components/Card';
 import { cardImages } from './cards'
 
 const ENDPOINT = "http://localhost:4001";

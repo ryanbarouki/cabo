@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react';
 import classnames from 'classnames';
-import './card.scss';
-import back from './cards/back.svg';
-import { socket } from './App.js';
+import './Card.scss';
+import back from '../cards/back.svg';
+import { socket } from '../App.js';
 import styled from 'styled-components';
 
 const StyledDiv = styled.div`
