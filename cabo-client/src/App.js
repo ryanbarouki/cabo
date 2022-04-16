@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import socketIOClient from 'socket.io-client';
 import Card from './card';
 import { cardImages } from './cards'
-import {Flipper, Flipped} from "react-flip-toolkit"
 
 const ENDPOINT = "http://localhost:4001";
 export const socket = socketIOClient(ENDPOINT);
@@ -62,29 +61,22 @@ function App() {
             <p>
                 It's <time dateTime={response}>{response}</time>
             </p>
-            {/* TODO need a better flipKey here  */}
-            <Flipper flipKey={cardList.join("")}>
                 <div className="container">
                     {players.map((player, playerIdx) => (
                         <div className={`player-container player-${playerIdx + 1}`}>
                             {player.cards.map((card, index) => (
-                                <Flipped key={`${playerIdx}${index}`} flipId={card}>
-                                    {flippedProps =>
-                                        <Card
-                                            cardImage={cardImages[card]}
-                                            index={`${playerIdx}${index}`}
-                                            key={`${playerIdx}${index}`}
-                                            flippedProps={flippedProps}
-                                        />
-                                    }
-                                </Flipped>
+                                    <Card
+                                        cardImage={cardImages[card]}
+                                        index={`${playerIdx}${index}`}
+                                        key={`${playerIdx}${index}`}
+                                        layout
+                                    />
                             ))}
                         </div>
                     ))}
                     <button onClick={handleStartGame}>Start Game</button>
                     <button onClick={handleSwap}>Swap</button>
                 </div>
-            </Flipper>
         </div>
     );
 }

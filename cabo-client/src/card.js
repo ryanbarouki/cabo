@@ -5,7 +5,7 @@ import './card.scss'
 import back from './cards/back.svg'
 import { socket } from './App.js'
 
-const Card = ({ cardImage, index, flippedProps }) => {
+const Card = ({ cardImage, index }) => {
     let [isFlipped, setFlipped] = useState(false);
     const [isSelected, setSelected] = useState(false)
 
@@ -39,7 +39,7 @@ const Card = ({ cardImage, index, flippedProps }) => {
     }, []);
 
     return (
-        <div {...flippedProps}
+        <div
             className={classnames(`card card-${index % 4 + 1}`, {
                 "is-flipped": isFlipped,
                 "is-highlighted": isSelected
