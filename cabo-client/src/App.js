@@ -11,6 +11,7 @@ function App() {
     const [response, setResponse] = useState("");
     const [players, setPlayers] = useState([]);
     const [cardList, setCardList] = useState([]);
+    const [transition, setTransition] = useState(false);
 
     useEffect(() => {
         socket.on("FromAPI", data => {
@@ -22,11 +23,9 @@ function App() {
         });
 
         socket.on("ShowSwap", data => {
-            const {playrs, cardList} = JSON.parse(data);
+            const {playrs} = JSON.parse(data);
             console.log(playrs)
-            console.log(cardList)
             setPlayers(playrs);
-            setCardList(cardList);
         });
 
         return () => socket.disconnect();
@@ -42,14 +41,8 @@ function App() {
         playrs[0].cards[0] = playrs[1].cards[0];
         playrs[1].cards[0] = temp;
         setPlayers(playrs);
-        const cardList = [];
-        for (const player of playrs) {
-            for (const card of player.cards){
-                cardList.push(card)
-            }
-        }
-        console.log(cardList.join(""));
-        setCardList(cardList)
+        setTransition(true);
+        setTimeout(() => setTransition(false), 500);
         socket.emit('Swap', JSON.stringify({playrs, cardList}));
         // TODO Need to re-deal the cards
     }
@@ -69,7 +62,7 @@ function App() {
                                         cardImage={cardImages[card]}
                                         index={`${playerIdx}${index}`}
                                         key={`${playerIdx}${index}`}
-                                        layout
+                                        transition={transition}
                                     />
                             ))}
                         </div>

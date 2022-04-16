@@ -1,11 +1,17 @@
-import React, { useEffect } from 'react'
+import React, { useEffect } from 'react';
 import { useState } from 'react';
-import classnames from 'classnames'
-import './card.scss'
-import back from './cards/back.svg'
-import { socket } from './App.js'
+import classnames from 'classnames';
+import './card.scss';
+import back from './cards/back.svg';
+import { socket } from './App.js';
+import styled from 'styled-components';
 
-const Card = ({ cardImage, index }) => {
+const StyledDiv = styled.div`
+    transition: 0.3s;    
+    transform: ${props => props.transition ? "translate(0, 100px)" : ""};
+`;
+
+const Card = ({ cardImage, index, transition }) => {
     let [isFlipped, setFlipped] = useState(false);
     const [isSelected, setSelected] = useState(false)
 
@@ -39,7 +45,7 @@ const Card = ({ cardImage, index }) => {
     }, []);
 
     return (
-        <div
+        <StyledDiv
             className={classnames(`card card-${index % 4 + 1}`, {
                 "is-flipped": isFlipped,
                 "is-highlighted": isSelected
@@ -47,6 +53,7 @@ const Card = ({ cardImage, index }) => {
             onClick={handleClick}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
+            transition={transition}
         >
             <div className="card-face card-front-face">
                 <img src={cardImage} alt="card" />
@@ -54,7 +61,7 @@ const Card = ({ cardImage, index }) => {
             <div className="card-face card-back-face">
                 <img src={back} alt="card" />
             </div>
-        </div>
+        </StyledDiv>
     )
 }
 
