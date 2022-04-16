@@ -1,14 +1,47 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react';
-import classnames from 'classnames';
-import './Card.scss';
 import back from '../cards/back.svg';
 import { socket } from '../App.js';
 import styled from 'styled-components';
 
-const StyledDiv = styled.div`
-    transition: 0.3s;    
-    transform: ${props => props.transition ? "translate(0, 100px)" : ""};
+const transformCard = (props) => {
+    let transform = "";
+    transform += props.rotate ? "rotateY(180deg)" : "rotateY(0deg)";
+    if (props.highlight) {
+        transform += "translate(0, -10px)";
+    }
+    return transform;
+}
+
+const CardContainer = styled.div`
+    transition: 0.3s;
+    transform: ${transformCard};
+    width: 100%;
+    height: 100%;
+    border-radius: 2px;
+    box-shadow: 2px 2px 4px 4px #DEDEDE;
+    transform-style: preserve-3d;
+    position: relative;
+    cursor: pointer;
+
+    grid-column-start: ${props => props.index % 2 + 1};
+    grid-row-start: ${props => Math.floor(props.index / 2) + 1};
+    
+    img {
+        width: 100%;
+        height: 100%;
+    }
+`;
+
+const CardFrontFace = styled(CardContainer)`
+    backface-visibility: hidden;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+`;
+
+const CardBackFace = styled(CardFrontFace)`
+    transform: rotateY(180deg);
 `;
 
 const Card = ({ cardImage, index, transition }) => {
@@ -45,23 +78,22 @@ const Card = ({ cardImage, index, transition }) => {
     }, []);
 
     return (
-        <StyledDiv
-            className={classnames(`card card-${index % 4 + 1}`, {
-                "is-flipped": isFlipped,
-                "is-highlighted": isSelected
-            })}
+        <CardContainer
             onClick={handleClick}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             transition={transition}
+            rotate={isFlipped}
+            highlight={isSelected}
+            index={index}
         >
-            <div className="card-face card-front-face">
+            <CardFrontFace>
                 <img src={cardImage} alt="card" />
-            </div>
-            <div className="card-face card-back-face">
+            </CardFrontFace>
+            <CardBackFace> 
                 <img src={back} alt="card" />
-            </div>
-        </StyledDiv>
+            </CardBackFace>
+        </CardContainer>
     )
 }
 
