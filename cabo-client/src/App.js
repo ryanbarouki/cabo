@@ -14,7 +14,6 @@ const sleep = (ms) => {
 function App() {
     const [response, setResponse] = useState("");
     const [players, setPlayers] = useState([]);
-    const [transition, setTransition] = useState(false);
     const [selectedCards, setSelectedCards] = useState([]);
     const cardRefs = useRef({});
 
@@ -37,7 +36,6 @@ function App() {
 
     useEffect(() => {
         if (selectedCards.length === 2) {
-            console.log(players)
             handleSwap();
         }
     }, [selectedCards]);
@@ -56,31 +54,30 @@ function App() {
         }
     }
 
-    const animateSwap = async (card1, card2) => {
+    const swapCardsOnDOM = async (card1, card2) => {
         const cardRef1 = cardRefs.current[card1];
         const cardRef2 = cardRefs.current[card2];
-        let diffY = cardRef1.offsetTop - cardRef2.offsetTop;
-        let diffX = cardRef1.offsetLeft - cardRef2.offsetLeft;
-        console.log(cardRef1.style.transform)
+        const diffY = Math.abs(cardRef1.offsetTop - cardRef2.offsetTop);
+        const diffX = Math.abs(cardRef1.offsetLeft - cardRef2.offsetLeft);
+        
+        const diffY1 = cardRef1.offsetTop > cardRef2.offsetTop ? -diffY : diffY;
+        const diffX1 = cardRef1.offsetLeft > cardRef2.offsetLeft ? -diffX : diffX;
 
-        cardRef1.style.transform = `translate(-${diffX}px, -${diffY}px)`;
-        cardRef2.style.transform = `translate(${diffX}px, ${diffY}px)`;
+        cardRef1.setAttribute("style", `transform: translate(${diffX1}px, ${diffY1}px); transition: 0s;`);
+        cardRef2.setAttribute("style", `transform: translate(${-diffX1}px, ${-diffY1}px); transition: 0s;`);
 
-        setTransition(true);
-        await sleep(300);
-
-        cardRef1.style.transition = "0s"
+        await sleep(50); // this is needed to make sure the style attribute is actually added
         cardRef1.removeAttribute("style");
         cardRef2.removeAttribute("style");
-        setTransition(false);
     }
 
     const handleSwap = () => {
+        if (selectedCards.length === 0) return;
         const [card1, card2] = selectedCards;
         const [player1Id, card1Id] = card1;
         const [player2Id, card2Id] = card2;
 
-        animateSwap(card1, card2);
+        swapCardsOnDOM(card1, card2);
 
         setPlayers(prevPlayers => {
             let players = [...prevPlayers];
@@ -97,8 +94,8 @@ function App() {
 
             return players;
         });
-
         setSelectedCards([]);
+
         // socket.emit('Swap', JSON.stringify({players}));
         // TODO Need to re-deal the cards
     }
@@ -121,7 +118,6 @@ function App() {
                                         cardImage={cardImages[card]}
                                         index={`${playerIdx}${index}`}
                                         key={`${playerIdx}${index}`}
-                                        transition={transition}
                                         onClick={() => handleCardSelect(`${playerIdx}${index}`)}
                                     />
                             ))}
