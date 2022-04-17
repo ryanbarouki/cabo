@@ -44,7 +44,7 @@ const CardBackFace = styled(CardFrontFace)`
     transform: rotateY(180deg);
 `;
 
-const Card = ({ cardImage, index, transition, onClick}) => {
+const Card = ({ cardImage, index, transition, onClick, saveRef}) => {
     let [isFlipped, setFlipped] = useState(false);
     const [isSelected, setSelected] = useState(false)
     const [playerIdx, cardIdx] = index;
@@ -80,6 +80,7 @@ const Card = ({ cardImage, index, transition, onClick}) => {
 
     return (
         <CardContainer
+            ref={ref => saveRef(index, ref)}
             onClick={handleClick}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}

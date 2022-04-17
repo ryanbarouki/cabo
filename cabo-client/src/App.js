@@ -1,5 +1,5 @@
 import './App.scss';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import socketIOClient from 'socket.io-client';
 import Card from './Components/Card';
 import { cardImages } from './cards'
@@ -12,6 +12,7 @@ function App() {
     const [players, setPlayers] = useState([]);
     const [transition, setTransition] = useState(false);
     const [selectedCards, setSelectedCards] = useState([]);
+    const cardRefs = useRef({});
 
     useEffect(() => {
         socket.on("FromAPI", data => {
@@ -44,16 +45,35 @@ function App() {
     const handleCardSelect = (cardId) => {
         if (selectedCards.length < 2) {
             setSelectedCards(selectedCards => [...selectedCards, cardId]);
+            console.log(cardRefs.current)
         }
         else {
             setSelectedCards([]);
         }
     }
 
+    const animateSwap = (card1, card2) => {
+        const cardRef1 = cardRefs.current[card1];
+        const cardRef2 = cardRefs.current[card2];
+        let diffY = cardRef1.offsetTop - cardRef2.offsetTop;
+        let diffX = cardRef1.offsetLeft - cardRef2.offsetLeft;
+        console.log(cardRef1.style.transform)
+
+        cardRef1.style.transform = `translate(-${diffX}px, -${diffY}px)`;
+        cardRef2.style.transform = `translate(${diffX}px, ${diffY}px)`;
+
+        // setTimeout(() => {
+        //     cardRef1.style.transform = "";
+        //     cardRef2.style.transform = "";
+        // }, 300);
+    }
+
     const handleSwap = () => {
         const [card1, card2] = selectedCards;
         const [player1Id, card1Id] = card1;
         const [player2Id, card2Id] = card2;
+
+        animateSwap(card1, card2);
 
         setPlayers(prevPlayers => {
             let players = [...prevPlayers];
@@ -65,13 +85,9 @@ function App() {
             cards1[card1Id] = cards2[card2Id];
             cards2[card2Id] = temp;
 
-            console.log(cards1)
-            console.log(cards2)
-
             players[player1Id] = {...players[player1Id], cards: cards1};
             players[player2Id] = {...players[player2Id], cards: cards2};
 
-            console.log("players", players);
             return players;
         });
 
@@ -81,6 +97,8 @@ function App() {
         setTimeout(() => setTransition(false), 500);
         // TODO Need to re-deal the cards
     }
+
+    const saveRef = (index, ref) => cardRefs.current[index] = ref
 
     return (
         <div className="App">
@@ -94,6 +112,7 @@ function App() {
                         <div className={`player-container player-${playerIdx + 1}`}>
                             {player.cards?.map((card, index) => (
                                     <Card
+                                        saveRef={saveRef}
                                         cardImage={cardImages[card]}
                                         index={`${playerIdx}${index}`}
                                         key={`${playerIdx}${index}`}
