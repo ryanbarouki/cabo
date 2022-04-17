@@ -14,7 +14,7 @@ const transformCard = (props) => {
 }
 
 const CardContainer = styled.div`
-    transition: 0.3s;
+    transition: ${props => props.transition ? "" : "0.3s"};
     transform: ${transformCard};
     width: 100%;
     height: 100%;

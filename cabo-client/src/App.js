@@ -7,6 +7,10 @@ import { cardImages } from './cards'
 const ENDPOINT = "http://localhost:4001";
 export const socket = socketIOClient(ENDPOINT);
 
+const sleep = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function App() {
     const [response, setResponse] = useState("");
     const [players, setPlayers] = useState([]);
@@ -52,7 +56,7 @@ function App() {
         }
     }
 
-    const animateSwap = (card1, card2) => {
+    const animateSwap = async (card1, card2) => {
         const cardRef1 = cardRefs.current[card1];
         const cardRef2 = cardRefs.current[card2];
         let diffY = cardRef1.offsetTop - cardRef2.offsetTop;
@@ -62,10 +66,13 @@ function App() {
         cardRef1.style.transform = `translate(-${diffX}px, -${diffY}px)`;
         cardRef2.style.transform = `translate(${diffX}px, ${diffY}px)`;
 
-        // setTimeout(() => {
-        //     cardRef1.style.transform = "";
-        //     cardRef2.style.transform = "";
-        // }, 300);
+        setTransition(true);
+        await sleep(300);
+
+        cardRef1.style.transition = "0s"
+        cardRef1.removeAttribute("style");
+        cardRef2.removeAttribute("style");
+        setTransition(false);
     }
 
     const handleSwap = () => {
@@ -93,8 +100,6 @@ function App() {
 
         setSelectedCards([]);
         // socket.emit('Swap', JSON.stringify({players}));
-        setTransition(true);
-        setTimeout(() => setTransition(false), 500);
         // TODO Need to re-deal the cards
     }
 
