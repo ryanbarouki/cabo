@@ -15,7 +15,9 @@ function App() {
     const [response, setResponse] = useState("");
     const [players, setPlayers] = useState([]);
     const [selectedCards, setSelectedCards] = useState([]);
+    const [transition, setTransition] = useState(false);
     const cardRefs = useRef({});
+    const transitionTime = 600;
 
     useEffect(() => {
         socket.on("FromAPI", data => {
@@ -36,6 +38,7 @@ function App() {
 
     useEffect(() => {
         if (selectedCards.length === 2) {
+            setTransition(true);
             handleSwap();
         }
     }, [selectedCards]);
@@ -77,8 +80,6 @@ function App() {
         const [player1Id, card1Id] = card1;
         const [player2Id, card2Id] = card2;
 
-        swapCardsOnDOM(card1, card2);
-
         setPlayers(prevPlayers => {
             let players = [...prevPlayers];
 
@@ -94,8 +95,11 @@ function App() {
 
             return players;
         });
+
+        swapCardsOnDOM(card1, card2);
         setSelectedCards([]);
 
+        setTimeout(() => setTransition(false), transitionTime)
         // socket.emit('Swap', JSON.stringify({players}));
         // TODO Need to re-deal the cards
     }
@@ -119,12 +123,13 @@ function App() {
                                         index={`${playerIdx}${index}`}
                                         key={`${playerIdx}${index}`}
                                         onClick={() => handleCardSelect(`${playerIdx}${index}`)}
+                                        transition={transition}
+                                        transitionTime={transitionTime}
                                     />
                             ))}
                         </div>
                     ))}
                     <button onClick={handleStartGame}>Start Game</button>
-                    <button onClick={handleSwap}>Swap</button>
                 </div>
         </div>
     );

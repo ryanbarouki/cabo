@@ -14,7 +14,7 @@ const transformCard = (props) => {
 }
 
 const CardContainer = styled.div`
-    transition: 0.3s;
+    transition: ${props => props.transition ? `${props.transitionTime / 1000}s`: "0.3s"};
     transform: ${transformCard};
     width: 100%;
     height: 100%;
@@ -44,7 +44,7 @@ const CardBackFace = styled(CardFrontFace)`
     transform: rotateY(180deg);
 `;
 
-const Card = ({ cardImage, index, onClick, saveRef}) => {
+const Card = ({ cardImage, index, onClick, saveRef, transition, transitionTime}) => {
     let [isFlipped, setFlipped] = useState(false);
     const [isSelected, setSelected] = useState(false)
     const [playerIdx, cardIdx] = index;
@@ -87,6 +87,8 @@ const Card = ({ cardImage, index, onClick, saveRef}) => {
             rotate={isFlipped}
             highlight={isSelected}
             index={cardIdx}
+            transition={transition}
+            transitionTime={transitionTime}
         >
             <CardFrontFace>
                 <img src={cardImage} alt="card" />
