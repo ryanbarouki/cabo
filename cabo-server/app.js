@@ -37,7 +37,8 @@ io.sockets.on("connection", client => {
             players.push(player);
         }
 
-        io.sockets.emit("DealCards", JSON.stringify(players))
+        const deck = shuffledDeck.slice(4*io.engine.clientsCount);
+        io.sockets.emit("DealCards", JSON.stringify({players, deck}))
     })
 
     client.on("FlipCard", (index, clientId)=> {

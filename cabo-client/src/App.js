@@ -2,7 +2,25 @@ import './App.scss';
 import { useState, useEffect, useRef } from 'react';
 import socketIOClient from 'socket.io-client';
 import Card from './Components/Card';
-import { cardImages } from './cards'
+import Deck from './Components/Deck';
+import { cardImages } from './cards';
+import styled from 'styled-components'
+
+const StartButton = styled.button`
+  height: 50px;
+`;
+
+const SwapButton = styled.button`
+  height: 50px;
+`;
+
+const StyledDeck = styled.div`
+    grid-column-start: 2;
+    grid-row-start: 2;
+    display: grid;
+    width: 214px;
+    height: 150px;
+`;
 
 const ENDPOINT = "http://localhost:4001";
 export const socket = socketIOClient(ENDPOINT);
@@ -16,6 +34,8 @@ function App() {
     const [players, setPlayers] = useState([]);
     const [selectedCards, setSelectedCards] = useState([]);
     const [transition, setTransition] = useState(false);
+    const [deck, setDeck] = useState([]);
+    const [swap, setSwap] = useState(false);
     const cardRefs = useRef({});
     const transitionTime = 600;
 
@@ -24,13 +44,16 @@ function App() {
             setResponse(data);
         });
 
-        socket.on('DealCards', rawPlayers => {
-            setPlayers(JSON.parse(rawPlayers));
+        socket.on('DealCards', data => {
+            const {players, deck} = JSON.parse(data);
+            setPlayers(players);
+            setDeck(deck);
         });
 
         socket.on("ShowSwap", data => {
-            const {playrs} = JSON.parse(data);
-            setPlayers(playrs);
+            // const {playrs} = JSON.parse(data);
+            handleSwap();
+            // setPlayers(playrs);
         });
 
         return () => socket.disconnect();
@@ -40,6 +63,8 @@ function App() {
         if (selectedCards.length === 2) {
             setTransition(true);
             handleSwap();
+            socket.emit('Swap', JSON.stringify({players}));
+            // setSwap(false);
         }
     }, [selectedCards]);
 
@@ -48,13 +73,13 @@ function App() {
     }
 
     const handleCardSelect = (cardId) => {
+      if (swap) {
         if (selectedCards.length < 2) {
             setSelectedCards(selectedCards => [...selectedCards, cardId]);
-            console.log(cardRefs.current)
-        }
-        else {
+        } else {
             setSelectedCards([]);
         }
+      } 
     }
 
     const swapCardsOnDOM = async (card1, card2) => {
@@ -99,40 +124,49 @@ function App() {
         swapCardsOnDOM(card1, card2);
         setSelectedCards([]);
 
-        setTimeout(() => setTransition(false), transitionTime)
-        // socket.emit('Swap', JSON.stringify({players}));
-        // TODO Need to re-deal the cards
+        setTimeout(() => {
+          setTransition(false);
+          setSwap(false);
+        }, transitionTime)
     }
 
     const saveRef = (index, ref) => cardRefs.current[index] = ref
 
-    return (
-        <div className="App">
-            <header className="App-header">
-            </header>
-            <p>
-                It's <time dateTime={response}>{response}</time>
-            </p>
-                <div className="container">
-                    {players?.map((player, playerIdx) => (
-                        <div className={`player-container player-${playerIdx + 1}`}>
-                            {player.cards?.map((card, index) => (
-                                    <Card
-                                        saveRef={saveRef}
-                                        cardImage={cardImages[card]}
-                                        index={`${playerIdx}${index}`}
-                                        key={`${playerIdx}${index}`}
-                                        onClick={() => handleCardSelect(`${playerIdx}${index}`)}
-                                        transition={transition}
-                                        transitionTime={transitionTime}
-                                    />
-                            ))}
-                        </div>
-                    ))}
-                    <button onClick={handleStartGame}>Start Game</button>
-                </div>
-        </div>
-    );
+  return (
+    <div className="App">
+      <header className="App-header">
+      </header>
+      <p>
+        It's <time dateTime={response}>{response}</time>
+      </p>
+      <StartButton onClick={handleStartGame}>Start Game</StartButton>
+      <SwapButton onClick={() => setSwap(true)}>Swap</SwapButton>
+
+      <div className="container">
+        <StyledDeck>
+          <Deck
+            topCard={cardImages[deck[0]]}
+          />
+        </StyledDeck>
+        {players?.map((player, playerIdx) => (
+          <div className={`player-container player-${playerIdx + 1}`}>
+            {player.cards?.map((card, index) => (
+              <Card
+                saveRef={saveRef}
+                cardImage={cardImages[card]}
+                index={`${playerIdx}${index}`}
+                key={`${playerIdx}${index}`}
+                onClick={() => handleCardSelect(`${playerIdx}${index}`)}
+                transition={transition}
+                transitionTime={transitionTime}
+                swap={swap}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export default App;

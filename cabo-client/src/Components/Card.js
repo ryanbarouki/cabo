@@ -5,16 +5,16 @@ import { socket } from '../App.js';
 import styled from 'styled-components';
 
 const transformCard = (props) => {
-    let transform = "";
-    transform += props.rotate ? "rotateY(180deg)" : "rotateY(0deg)";
-    if (props.highlight) {
-        transform += "translate(0, -10px)";
-    }
-    return transform;
+  let transform = "";
+  transform += props.rotate ? "rotateY(180deg)" : "rotateY(0deg)";
+  if (props.highlight) {
+    transform += "translate(0, -10px)";
+  }
+  return transform;
 }
 
 const CardContainer = styled.div`
-    transition: ${props => props.transition ? `${props.transitionTime / 1000}s`: "0.3s"};
+    transition: ${props => props.transition ? `${props.transitionTime / 1000}s` : "0.3s"};
     transform: ${transformCard};
     width: 100%;
     height: 100%;
@@ -44,60 +44,62 @@ const CardBackFace = styled(CardFrontFace)`
     transform: rotateY(180deg);
 `;
 
-const Card = ({ cardImage, index, onClick, saveRef, transition, transitionTime}) => {
-    let [isFlipped, setFlipped] = useState(false);
-    const [isSelected, setSelected] = useState(false)
-    const [playerIdx, cardIdx] = index;
+const Card = ({ cardImage, index, onClick, saveRef, transition, transitionTime, swap }) => {
+  const [isFlipped, setFlipped] = useState(false);
+  const [isSelected, setSelected] = useState(false)
+  const [playerIdx, cardIdx] = index;
 
-    const handleClick = () => {
-        onClick();
-        socket.emit("FlipCard", index, socket.id);
-        console.log(`emit card flip index: ${index}`);
-        // setFlipped(!isFlipped); // maybe don't need this here and avoids the workaround
-    };
+  const handleClick = () => {
+    onClick();
+    // socket.emit("FlipCard", index, socket.id);
+    console.log(`emit card flip index: ${index}`);
+    if (!swap) {
+      setFlipped(!isFlipped); // maybe don't need this here and avoids the workaround
+    }
+  };
 
-    const handleMouseEnter = event => {
-        setSelected(true)
-    };
+  const handleMouseEnter = event => {
+    setSelected(true)
+  };
 
-    const handleMouseLeave = event => {
-        setSelected(false)
-    };
+  const handleMouseLeave = event => {
+    setSelected(false)
+  };
 
-    useEffect(() => {
-        socket.on("CardFlipped", rawData => {
-            const data = JSON.parse(rawData);
-            if (data.clientId === socket.id) {
-                // this was the sender
-                return;
-            }
-            if (index === data.cardId) {
-                console.log(`card flipped! index: ${data.cardId}`);
-                setFlipped(flipped => !flipped);
-            }
-        });
-    }, []);
+  useEffect(() => {
+    socket.on("CardFlipped", rawData => {
+      const data = JSON.parse(rawData);
+      if (data.clientId === socket.id) {
+        // this was the sender
+        return;
+      }
+      if (index === data.cardId) {
+        console.log(`card flipped! index: ${data.cardId}`);
+        setFlipped(flipped => !flipped);
+      }
+    });
+  }, []);
 
-    return (
-        <CardContainer
-            ref={ref => saveRef(index, ref)}
-            onClick={handleClick}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            rotate={isFlipped}
-            highlight={isSelected}
-            index={cardIdx}
-            transition={transition}
-            transitionTime={transitionTime}
-        >
-            <CardFrontFace>
-                <img src={cardImage} alt="card" />
-            </CardFrontFace>
-            <CardBackFace> 
-                <img src={back} alt="card" />
-            </CardBackFace>
-        </CardContainer>
-    )
+  return (
+    <CardContainer
+      ref={ref => saveRef(index, ref)}
+      onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      rotate={isFlipped}
+      highlight={isSelected}
+      index={cardIdx}
+      transition={transition}
+      transitionTime={transitionTime}
+    >
+      <CardFrontFace>
+        <img src={cardImage} alt="card" />
+      </CardFrontFace>
+      <CardBackFace>
+        <img src={back} alt="card" />
+      </CardBackFace>
+    </CardContainer>
+  )
 }
 
 export default Card;
