@@ -36,6 +36,7 @@ function App() {
     const [transition, setTransition] = useState(false);
     const [deck, setDeck] = useState([]);
     const [swap, setSwap] = useState(false);
+    const [flipped, setFlipped] = useState({});
     const cardRefs = useRef({});
     const transitionTime = 600;
 
@@ -48,6 +49,12 @@ function App() {
             const {players, deck} = JSON.parse(data);
             setPlayers(players);
             setDeck(deck);
+            // TODO set flipped object here
+            players.forEach((player, playerId) => player.cards.forEach(
+              (card, cardId) => {
+                setFlipped(flipped => ({...flipped, [`${playerId}${cardId}`]: true}));
+              }
+            ));
         });
 
         socket.on("ShowSwap", data => {
@@ -75,11 +82,18 @@ function App() {
     const handleCardSelect = (cardId) => {
       if (swap) {
         if (selectedCards.length < 2) {
-            setSelectedCards(selectedCards => [...selectedCards, cardId]);
+          setSelectedCards(selectedCards => [...selectedCards, cardId]);
         } else {
-            setSelectedCards([]);
+          setSelectedCards([]);
         }
-      } 
+      } else {
+        setFlipped(oldFlipped => ({...oldFlipped, [cardId]: !oldFlipped[cardId]}));
+      }
+
+    }
+
+    const cardAnimationStyle = (diffX, diffY, card) => {
+      return `transform: translate(${diffX}px, ${diffY}px) ${flipped[card] ? "rotateY(180deg)" : "rotateY(0deg)"}; transition: 0s;`
     }
 
     const swapCardsOnDOM = async (card1, card2) => {
@@ -91,8 +105,8 @@ function App() {
         const diffY1 = cardRef1.offsetTop > cardRef2.offsetTop ? -diffY : diffY;
         const diffX1 = cardRef1.offsetLeft > cardRef2.offsetLeft ? -diffX : diffX;
 
-        cardRef1.setAttribute("style", `transform: translate(${diffX1}px, ${diffY1}px); transition: 0s;`);
-        cardRef2.setAttribute("style", `transform: translate(${-diffX1}px, ${-diffY1}px); transition: 0s;`);
+        cardRef1.setAttribute("style", cardAnimationStyle(diffX1, diffY1, card1));
+        cardRef2.setAttribute("style", cardAnimationStyle(-diffX1, -diffY1, card2));
 
         await sleep(50); // this is needed to make sure the style attribute is actually added
         cardRef1.removeAttribute("style");
@@ -160,6 +174,7 @@ function App() {
                 transition={transition}
                 transitionTime={transitionTime}
                 swap={swap}
+                flipped={flipped[`${playerIdx}${index}`]}
               />
             ))}
           </div>

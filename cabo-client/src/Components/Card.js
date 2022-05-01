@@ -44,8 +44,7 @@ const CardBackFace = styled(CardFrontFace)`
     transform: rotateY(180deg);
 `;
 
-const Card = ({ cardImage, index, onClick, saveRef, transition, transitionTime, swap }) => {
-  const [isFlipped, setFlipped] = useState(false);
+const Card = ({ cardImage, index, onClick, saveRef, transition, transitionTime, swap, flipped}) => {
   const [isSelected, setSelected] = useState(false)
   const [playerIdx, cardIdx] = index;
 
@@ -53,9 +52,6 @@ const Card = ({ cardImage, index, onClick, saveRef, transition, transitionTime, 
     onClick();
     // socket.emit("FlipCard", index, socket.id);
     console.log(`emit card flip index: ${index}`);
-    if (!swap) {
-      setFlipped(!isFlipped); // maybe don't need this here and avoids the workaround
-    }
   };
 
   const handleMouseEnter = event => {
@@ -75,7 +71,6 @@ const Card = ({ cardImage, index, onClick, saveRef, transition, transitionTime, 
       }
       if (index === data.cardId) {
         console.log(`card flipped! index: ${data.cardId}`);
-        setFlipped(flipped => !flipped);
       }
     });
   }, []);
@@ -86,7 +81,7 @@ const Card = ({ cardImage, index, onClick, saveRef, transition, transitionTime, 
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      rotate={isFlipped}
+      rotate={flipped}
       highlight={isSelected}
       index={cardIdx}
       transition={transition}
