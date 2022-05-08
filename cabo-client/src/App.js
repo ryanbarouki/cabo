@@ -20,6 +20,8 @@ const StyledDeck = styled.div`
     display: grid;
     width: 214px;
     height: 150px;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(1, 1fr);
 `;
 
 const ENDPOINT = "http://localhost:4001";
@@ -35,8 +37,10 @@ function App() {
     const [selectedCards, setSelectedCards] = useState([]);
     const [transition, setTransition] = useState(false);
     const [deck, setDeck] = useState([]);
+    const [discardedCard, setDiscardedCard] = useState();
     const [swap, setSwap] = useState(false);
     const [flipped, setFlipped] = useState({});
+    const [selectingFromDeck, setSelectingFromDeck] = useState(false);
     const cardRefs = useRef({});
     const transitionTime = 600;
 
@@ -49,7 +53,9 @@ function App() {
             const {players, deck} = JSON.parse(data);
             setPlayers(players);
             setDeck(deck);
-            // TODO set flipped object here
+            setFlipped(flipped => ({...flipped, ["topDeck"]: true}))
+            setFlipped(flipped => ({...flipped, ["disCard"]: false}))
+            setDiscardedCard(deck[1])
             players.forEach((player, playerId) => player.cards.forEach(
               (card, cardId) => {
                 setFlipped(flipped => ({...flipped, [`${playerId}${cardId}`]: true}));
@@ -78,8 +84,18 @@ function App() {
     const handleStartGame = () => {
         socket.emit('StartGame');
     }
+    
 
     const handleCardSelect = (cardId) => {
+      if (selectingFromDeck) {
+        handleDeckExchange(cardId);
+        return;
+      }
+      if (cardId === "topDeck") {
+        setSelectingFromDeck(true);
+        setFlipped(oldFlipped => ({...oldFlipped, [cardId]: !oldFlipped[cardId]}));
+        return;
+      }
       if (swap) {
         if (selectedCards.length < 2) {
           setSelectedCards(selectedCards => [...selectedCards, cardId]);
@@ -94,6 +110,53 @@ function App() {
 
     const cardAnimationStyle = (diffX, diffY, card) => {
       return `transform: translate(${diffX}px, ${diffY}px) ${flipped[card] ? "rotateY(180deg)" : "rotateY(0deg)"}; transition: 0s;`
+    }
+
+    const cardAnimationStyleTest = (diffX, diffY, flipped) => {
+      return `transform: translate(${diffX}px, ${diffY}px) ${flipped ? "rotateY(180deg)" : "rotateY(0deg)"};`;
+    }
+
+    const handleDeckExchange = async (cardId) => {
+      // TODO: swap the actual cards not just the DOM elements
+      const topDeck = cardRefs.current["topDeck"];
+      const disCard = cardRefs.current["disCard"];
+      const playerCard = cardRefs.current[cardId];
+      const diffYPlayer = Math.abs(disCard.offsetTop - playerCard.offsetTop);
+      const diffXPlayer = Math.abs(disCard.offsetLeft - playerCard.offsetLeft);
+
+      const diffYDeck = Math.abs(topDeck.offsetTop - playerCard.offsetTop);
+      const diffXDeck = Math.abs(topDeck.offsetLeft - playerCard.offsetLeft);
+
+      const diffY1Player = playerCard.offsetTop > disCard.offsetTop ? -diffYPlayer : diffYPlayer;
+      const diffX1Player = playerCard.offsetLeft > disCard.offsetLeft ? -diffXPlayer : diffXPlayer;
+
+      const diffY1Deck = topDeck.offsetTop > playerCard.offsetTop ? -diffYDeck : diffYDeck;
+      const diffX1Deck = topDeck.offsetLeft > playerCard.offsetLeft ? -diffXDeck : diffXDeck;
+
+      playerCard.setAttribute("style", cardAnimationStyleTest(diffX1Player, diffY1Player, false));
+      topDeck.setAttribute("style", cardAnimationStyleTest(diffX1Deck, diffY1Deck, true));
+
+      await sleep(transitionTime); 
+      const [playerId, card] = cardId;
+      setPlayers(prevPlayers => {
+          let players = [...prevPlayers];
+          let cards = [...players[playerId].cards];
+
+          const temp = cards[card];
+          cards[card] = deck[0];
+          setDiscardedCard(temp);
+
+          players[playerId] = {...players[playerId], cards: cards};
+
+          return players;
+      });
+      setDeck(oldDeck => oldDeck.slice(1))
+      playerCard.setAttribute("style", cardAnimationStyle(0, 0, cardId));
+      topDeck.setAttribute("style", cardAnimationStyle(0, 0, "topDeck"));
+      await sleep(50); // this is needed to make sure the style attribute is actually added
+      playerCard.removeAttribute("style");
+      topDeck.removeAttribute("style");
+      setSelectingFromDeck(false);
     }
 
     const swapCardsOnDOM = async (card1, card2) => {
@@ -157,23 +220,39 @@ function App() {
       <SwapButton onClick={() => setSwap(true)}>Swap</SwapButton>
 
       <div className="container">
-        <StyledDeck>
-          <Deck
-            topCard={cardImages[deck[0]]}
-          />
-        </StyledDeck>
+        {deck.length > 0 && 
+          <StyledDeck>
+            <Card
+              cardImage={cardImages[deck[0]]}
+              index="00"
+              saveRef={ref => saveRef("topDeck", ref)}
+              onClick={() => handleCardSelect("topDeck")}
+              transition={false}
+              transitionTime={500}
+              flipped={flipped["topDeck"]}
+            />
+            <Card
+              cardImage={cardImages[discardedCard]}
+              index="01"
+              saveRef={ref => saveRef("disCard", ref)}
+              onClick={() => {}}
+              transition={false}
+              transitionTime={500}
+              flipped={flipped["disCard"]}
+            />
+          </StyledDeck>
+        }
         {players?.map((player, playerIdx) => (
           <div className={`player-container player-${playerIdx + 1}`}>
             {player.cards?.map((card, index) => (
               <Card
-                saveRef={saveRef}
+                saveRef={ref => saveRef(`${playerIdx}${index}`, ref)}
                 cardImage={cardImages[card]}
                 index={`${playerIdx}${index}`}
                 key={`${playerIdx}${index}`}
                 onClick={() => handleCardSelect(`${playerIdx}${index}`)}
                 transition={transition}
                 transitionTime={transitionTime}
-                swap={swap}
                 flipped={flipped[`${playerIdx}${index}`]}
               />
             ))}

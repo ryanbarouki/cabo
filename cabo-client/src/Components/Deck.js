@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import back from '../cards/back.svg';
 import Card from './Card';
+import { cardImages } from '../cards';
 
 const DeckContainer = styled.div`
   display: grid;
@@ -8,11 +9,11 @@ const DeckContainer = styled.div`
   grid-template-rows: repeat(1, 1fr);
 `;
 
-function Deck({topCard}) {
+function Deck({deck}) {
   return (
     <DeckContainer>
       <Card
-        cardImage={topCard}
+        cardImage={cardImages[deck[0]]}
         index="00"
         saveRef={() => { }}
         onClick={() => {}}
@@ -20,7 +21,7 @@ function Deck({topCard}) {
         transitionTime={500}
       />
       <Card
-        cardImage={back}
+        cardImage={cardImages[deck[1]]}
         index="01"
         saveRef={() => { }}
         onClick={() => {}}
