@@ -46,7 +46,7 @@
   .container {
     border: 1px solid #DEDEDE;
     padding: 12px;
-    box-shadow: 0 0 4px 4px #DEDEDE; 
+    box-shadow: 0 0 5px 1px #DEDEDE; 
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
@@ -63,7 +63,7 @@
   .player-container {
     border: 1px solid #DEDEDE;
     padding: 12px;
-    box-shadow: 0 0 4px 4px #DEDEDE; 
+    box-shadow: 0 0 5px 1px #DEDEDE; 
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);

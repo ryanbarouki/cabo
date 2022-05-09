@@ -18,8 +18,8 @@ const CardContainer = styled.div`
     transform: ${transformCard};
     width: 100%;
     height: 100%;
-    border-radius: 2px;
-    box-shadow: 2px 2px 4px 4px #DEDEDE;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px 1px #DEDEDE;
     transform-style: preserve-3d;
     position: relative;
     cursor: pointer;

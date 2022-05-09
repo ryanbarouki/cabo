@@ -19,10 +19,11 @@ const StyledDeck = styled.div`
     grid-column-start: 2;
     grid-row-start: 2;
     display: grid;
-    width: 219px;
-    height: 154.5px;
+    width: 225px;
+    height: 153px;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(1, 1fr);
+    gap: 5px;
 `;
 
 const ENDPOINT = "http://localhost:4001";
@@ -226,6 +227,7 @@ function App() {
       <div className="container">
         {deck.length > 0 && 
           <StyledDeck>
+            <Deck/>
             <Card
               cardImage={cardImages[deck[0]]}
               index="00"
