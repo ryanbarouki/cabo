@@ -91,6 +91,7 @@ function App() {
 
     const handleCardSelect = (cardId) => {
       if (selectingFromDeck) {
+        if (cardId == "topDeck") return;
         handleDeckExchange(cardId);
         return;
       }
