@@ -2,33 +2,26 @@ import styled from 'styled-components';
 import back from '../cards/back.svg';
 import Card from './Card';
 import { cardImages } from '../cards';
+import { useState } from 'react';
 
-const DeckContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(1, 1fr);
-`;
 
-function Deck({deck}) {
+
+function Deck({deck, saveRef, handleCardSelect, transitionTime}) {
+  const [flipped, setFlipped] = useState(true);
+  const handleClick = () => {
+    handleCardSelect("topDeck");
+    setFlipped(true);
+  }
   return (
-    <DeckContainer>
       <Card
         cardImage={cardImages[deck[0]]}
         index="00"
-        saveRef={() => { }}
-        onClick={() => {}}
+        saveRef={ref => saveRef("topDeck", ref)}
+        onClick={() => handleCardSelect("topDeck")}
         transition={false}
-        transitionTime={500}
+        transitionTime={transitionTime}
+        flipped={flipped}
       />
-      <Card
-        cardImage={cardImages[deck[1]]}
-        index="01"
-        saveRef={() => { }}
-        onClick={() => {}}
-        transition={false}
-        transitionTime={500}
-      />
-    </DeckContainer>
   )
 }
 

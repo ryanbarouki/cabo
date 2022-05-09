@@ -5,6 +5,7 @@ import Card from './Components/Card';
 import Deck from './Components/Deck';
 import { cardImages } from './cards';
 import styled from 'styled-components'
+import back from './cards/back.svg';
 
 const StartButton = styled.button`
   height: 50px;
@@ -18,8 +19,8 @@ const StyledDeck = styled.div`
     grid-column-start: 2;
     grid-row-start: 2;
     display: grid;
-    width: 214px;
-    height: 150px;
+    width: 219px;
+    height: 154.5px;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(1, 1fr);
 `;
@@ -38,6 +39,7 @@ function App() {
     const [transition, setTransition] = useState(false);
     const [deck, setDeck] = useState([]);
     const [discardedCard, setDiscardedCard] = useState();
+    const [topDeckCard, setTopDeckCard] = useState();
     const [swap, setSwap] = useState(false);
     const [flipped, setFlipped] = useState({});
     const [selectingFromDeck, setSelectingFromDeck] = useState(false);
@@ -53,9 +55,9 @@ function App() {
             const {players, deck} = JSON.parse(data);
             setPlayers(players);
             setDeck(deck);
-            setFlipped(flipped => ({...flipped, ["topDeck"]: true}))
-            setFlipped(flipped => ({...flipped, ["disCard"]: false}))
-            setDiscardedCard(deck[1])
+            setFlipped(flipped => ({...flipped, ["topDeck"]: true}));
+            setFlipped(flipped => ({...flipped, ["disCard"]: false}));
+            setDiscardedCard(deck[1]);
             players.forEach((player, playerId) => player.cards.forEach(
               (card, cardId) => {
                 setFlipped(flipped => ({...flipped, [`${playerId}${cardId}`]: true}));
@@ -108,16 +110,17 @@ function App() {
 
     }
 
-    const cardAnimationStyle = (diffX, diffY, card) => {
-      return `transform: translate(${diffX}px, ${diffY}px) ${flipped[card] ? "rotateY(180deg)" : "rotateY(0deg)"}; transition: 0s;`
+    const cardAnimationStyle = (diffX, diffY, flipped) => {
+      return `transform: translate(${diffX}px, ${diffY}px) ${flipped ? "rotateY(180deg)" : "rotateY(0deg)"}; transition: 0s;`
     }
 
-    const cardAnimationStyleTest = (diffX, diffY, flipped) => {
+    const cardAnimationStyleNoTransition = (diffX, diffY, flipped) => {
       return `transform: translate(${diffX}px, ${diffY}px) ${flipped ? "rotateY(180deg)" : "rotateY(0deg)"};`;
     }
 
     const handleDeckExchange = async (cardId) => {
-      // TODO: swap the actual cards not just the DOM elements
+      setTransition(true);
+      setFlipped(oldFlipped => ({...oldFlipped, ["topDeck"]: true}));
       const topDeck = cardRefs.current["topDeck"];
       const disCard = cardRefs.current["disCard"];
       const playerCard = cardRefs.current[cardId];
@@ -133,10 +136,11 @@ function App() {
       const diffY1Deck = topDeck.offsetTop > playerCard.offsetTop ? -diffYDeck : diffYDeck;
       const diffX1Deck = topDeck.offsetLeft > playerCard.offsetLeft ? -diffXDeck : diffXDeck;
 
-      playerCard.setAttribute("style", cardAnimationStyleTest(diffX1Player, diffY1Player, false));
-      topDeck.setAttribute("style", cardAnimationStyleTest(diffX1Deck, diffY1Deck, true));
+      playerCard.setAttribute("style", cardAnimationStyleNoTransition(diffX1Player, diffY1Player, false));
+      topDeck.setAttribute("style", cardAnimationStyleNoTransition(diffX1Deck, diffY1Deck, true));
 
       await sleep(transitionTime); 
+      setTransition(false);
       const [playerId, card] = cardId;
       setPlayers(prevPlayers => {
           let players = [...prevPlayers];
@@ -151,8 +155,8 @@ function App() {
           return players;
       });
       setDeck(oldDeck => oldDeck.slice(1))
-      playerCard.setAttribute("style", cardAnimationStyle(0, 0, cardId));
-      topDeck.setAttribute("style", cardAnimationStyle(0, 0, "topDeck"));
+      playerCard.setAttribute("style", cardAnimationStyle(0, 0, flipped[cardId]));
+      topDeck.setAttribute("style", cardAnimationStyle(0, 0, true));
       await sleep(50); // this is needed to make sure the style attribute is actually added
       playerCard.removeAttribute("style");
       topDeck.removeAttribute("style");
@@ -168,8 +172,8 @@ function App() {
         const diffY1 = cardRef1.offsetTop > cardRef2.offsetTop ? -diffY : diffY;
         const diffX1 = cardRef1.offsetLeft > cardRef2.offsetLeft ? -diffX : diffX;
 
-        cardRef1.setAttribute("style", cardAnimationStyle(diffX1, diffY1, card1));
-        cardRef2.setAttribute("style", cardAnimationStyle(-diffX1, -diffY1, card2));
+        cardRef1.setAttribute("style", cardAnimationStyle(diffX1, diffY1, flipped[card1]));
+        cardRef2.setAttribute("style", cardAnimationStyle(-diffX1, -diffY1, flipped[card2]));
 
         await sleep(50); // this is needed to make sure the style attribute is actually added
         cardRef1.removeAttribute("style");
@@ -227,8 +231,8 @@ function App() {
               index="00"
               saveRef={ref => saveRef("topDeck", ref)}
               onClick={() => handleCardSelect("topDeck")}
-              transition={false}
-              transitionTime={500}
+              transition={transition}
+              transitionTime={transitionTime}
               flipped={flipped["topDeck"]}
             />
             <Card
@@ -236,8 +240,8 @@ function App() {
               index="01"
               saveRef={ref => saveRef("disCard", ref)}
               onClick={() => {}}
-              transition={false}
-              transitionTime={500}
+              transition={transition}
+              transitionTime={transitionTime}
               flipped={flipped["disCard"]}
             />
           </StyledDeck>
