@@ -11,19 +11,55 @@ const StartButton = styled.button`
   height: 50px;
 `;
 
-const SwapButton = styled.button`
-  height: 50px;
+const Button = styled.button`
+  border-radius: 8px;
+  border-style: solid;
+  border-width: 0px;
+  padding: 12px;
+  font-size: 0.9rem;
+
+  :active {
+    background-color: darkgray;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    color: #DADADA;
+    background-color: #1F2023;  
+
+    :active {
+      background-color: #000;
+    }
+  }
 `;
 
 const StyledDeck = styled.div`
-    grid-column-start: 2;
-    grid-row-start: 2;
-    display: grid;
+    display: flex;
     width: 225px;
     height: 153px;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(1, 1fr);
     gap: 5px;
+`;
+
+const PlayerGrid = styled.div`
+  padding: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  justify-items: center;
+  align-items: stretch;
+  gap: 5px;
+  margin: 0 auto;
+  perspective: 100%;
+  max-width:1380px;
+`;
+
+const Container = styled.div`
+  grid-column-start: 2;
+  grid-row-start: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 `;
 
 const ENDPOINT = "http://localhost:4001";
@@ -50,7 +86,6 @@ function App() {
   const transitionTime = 600;
 
   useEffect(() => {
-    console.log(flipped)
     socket.on("ShowSwap", data => {
       const { cardsToSwap } = JSON.parse(data);
       handleSwap(cardsToSwap);
@@ -220,18 +255,14 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-      </header>
-      <p>
-        It's <time dateTime={response}>{response}</time>
-      </p>
-      <StartButton onClick={handleStartGame}>Start Game</StartButton>
-      <SwapButton onClick={() => setSwap(true)}>Swap</SwapButton>
+      <Button onClick={handleStartGame}>Start Game</Button>
 
-      <div className="container">
+      <PlayerGrid>
         {deck.length > 0 &&
+        <Container>
+
           <StyledDeck>
-            <Deck />
+            {/* <Deck /> */}
             <Card
               cardImage={cardImages[deck[0]]}
               index="00"
@@ -251,6 +282,8 @@ function App() {
               flipped={flipped[DISCARD]}
             />
           </StyledDeck>
+          <Button onClick={() => setSwap(true)}>Swap</Button>
+        </Container>
         }
         {players?.map((player, playerIdx) => (
           <div className={`player-container player-${playerIdx + 1}`}>
@@ -268,7 +301,7 @@ function App() {
             ))}
           </div>
         ))}
-      </div>
+      </PlayerGrid>
     </div>
   );
 }

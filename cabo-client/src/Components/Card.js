@@ -69,9 +69,6 @@ const Card = ({ cardImage, index, onClick, saveRef, transition, transitionTime, 
         // this was the sender
         return;
       }
-      if (index === data.cardId) {
-        console.log(`card flipped! index: ${data.cardId}`);
-      }
     });
   }, []);
 
