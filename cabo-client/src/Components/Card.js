@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 const transformCard = (props) => {
   let transform = "";
-  transform += props.rotate ? "rotateY(180deg)" : "rotateY(0deg)";
+  transform += props.$rotate ? "rotateY(180deg)" : "rotateY(0deg)";
   if (props.highlight) {
     transform += "translate(0, -10px)";
   }
@@ -78,7 +78,7 @@ const Card = ({ cardImage, index, onClick, saveRef, transition, transitionTime, 
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      rotate={flipped}
+      $rotate={flipped}
       highlight={isSelected}
       index={cardIdx}
       transition={transition}

@@ -1,4 +1,3 @@
-import './App.scss';
 import { useState, useEffect, useRef } from 'react';
 import socketIOClient from 'socket.io-client';
 import Card from './Components/Card';
@@ -164,7 +163,7 @@ function App() {
 
   const handleCardSelect = (cardId) => {
     if (selectingFromDeck) {
-      if (cardId == TOP_DECK) return;
+      if (cardId === TOP_DECK) return;
       handleDeckExchange(cardId);
       return;
     }
@@ -290,11 +289,9 @@ function App() {
   const saveRef = (index, ref) => cardRefs.current[index] = ref
 
   return (
-    <div className="App">
-
-      <PlayerGrid numPlayers={players.length}>
+    <PlayerGrid numPlayers={players.length}>
       {deck.length === 0 && <StartButton onClick={handleStartGame}>Start Game</StartButton>}
-        {deck.length > 0 &&
+      {deck.length > 0 &&
         <CentreContainer>
           <StyledDeck>
             {/* <Deck /> */}
@@ -319,25 +316,24 @@ function App() {
           </StyledDeck>
           <Button onClick={() => setSwap(true)}>Swap</Button>
         </CentreContainer>
-        }
-        {players?.map((player, playerIdx) => (
-          <CardContainer playerNumber={playerIdx}>
-            {player.cards?.map((card, index) => (
-              <Card
-                saveRef={ref => saveRef(`${playerIdx}${index}`, ref)}
-                cardImage={cardImages[card]}
-                index={`${playerIdx}${index}`}
-                key={`${playerIdx}${index}`}
-                onClick={() => handleCardSelect(`${playerIdx}${index}`)}
-                transition={transition}
-                transitionTime={transitionTime}
-                flipped={flipped[`${playerIdx}${index}`]}
-              />
-            ))}
-          </CardContainer>
-        ))}
-      </PlayerGrid>
-    </div>
+      }
+      {players?.map((player, playerIdx) => (
+        <CardContainer key={playerIdx} playerNumber={playerIdx}>
+          {player.cards?.map((card, index) => (
+            <Card
+              saveRef={ref => saveRef(`${playerIdx}${index}`, ref)}
+              cardImage={cardImages[card]}
+              index={`${playerIdx}${index}`}
+              key={`${playerIdx}${index}`}
+              onClick={() => handleCardSelect(`${playerIdx}${index}`)}
+              transition={transition}
+              transitionTime={transitionTime}
+              flipped={flipped[`${playerIdx}${index}`]}
+            />
+          ))}
+        </CardContainer>
+      ))}
+    </PlayerGrid>
   );
 }
 
