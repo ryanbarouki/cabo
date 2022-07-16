@@ -237,7 +237,7 @@ function App() {
     setSelectingFromDeck(false);
   }
 
-  const swapCardsOnDOM = async (card1, card2) => {
+  const swapCardsOnDOM = (card1, card2) => {
     const cardRef1 = cardRefs.current[card1];
     const cardRef2 = cardRefs.current[card2];
     const diffY = Math.abs(cardRef1.offsetTop - cardRef2.offsetTop);
@@ -249,9 +249,10 @@ function App() {
     cardRef1.setAttribute("style", cardAnimationStyle(diffX1, diffY1, flipped[card1]));
     cardRef2.setAttribute("style", cardAnimationStyle(-diffX1, -diffY1, flipped[card2]));
 
-    await sleep(50); // this is needed to make sure the style attribute is actually added
-    cardRef1.removeAttribute("style");
-    cardRef2.removeAttribute("style");
+    setTimeout(() => {
+      cardRef1.removeAttribute("style");
+      cardRef2.removeAttribute("style");
+    }, 50);
   }
 
   const handleSwap = (cardsToSwap) => {

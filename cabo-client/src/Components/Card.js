@@ -51,7 +51,6 @@ const Card = ({ cardImage, index, onClick, saveRef, transition, transitionTime, 
   const handleClick = () => {
     onClick();
     // socket.emit("FlipCard", index, socket.id);
-    console.log(`emit card flip index: ${index}`);
   };
 
   const handleMouseEnter = event => {
