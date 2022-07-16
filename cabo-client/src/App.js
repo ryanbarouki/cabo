@@ -2,14 +2,10 @@ import './App.scss';
 import { useState, useEffect, useRef } from 'react';
 import socketIOClient from 'socket.io-client';
 import Card from './Components/Card';
-import Deck from './Components/Deck';
 import { cardImages } from './cards';
-import styled from 'styled-components'
-import back from './cards/back.svg';
+import styled from 'styled-components';
+import { css } from 'styled-components';
 
-const StartButton = styled.button`
-  height: 50px;
-`;
 
 const Button = styled.button`
   border-radius: 8px;
@@ -32,6 +28,10 @@ const Button = styled.button`
   }
 `;
 
+const StartButton = styled(Button)`
+  grid-area: deck;
+`;
+
 const StyledDeck = styled.div`
     display: flex;
     width: 225px;
@@ -41,11 +41,39 @@ const StyledDeck = styled.div`
     gap: 5px;
 `;
 
+const getLayout = (numPlayers) => {
+  if (numPlayers <= 2) {
+    return css`
+      grid-template-columns: repeat(3, 1fr); 
+      grid-template-rows: repeat(1, 1fr); 
+      grid-template-areas: "player1 deck player2";
+    `;
+  }
+
+  if (numPlayers === 3) {
+    return css`
+      grid-template-columns: repeat(3, 1fr); 
+      grid-template-rows: repeat(2, 1fr); 
+      grid-template-areas: "player2 deck player3"
+                          ". player1 .";
+    `;
+  }
+
+  if (numPlayers === 4) {
+    return css`
+      grid-template-columns: repeat(3, 1fr); 
+      grid-template-rows: repeat(3, 1fr); 
+      grid-template-areas: ". player3 ."
+                          "player2 deck player4"
+                          ". player1 .";
+    `;
+  }
+};
+
 const PlayerGrid = styled.div`
   padding: 12px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  ${({numPlayers}) => getLayout(numPlayers)};
   justify-items: center;
   align-items: stretch;
   gap: 5px;
@@ -54,12 +82,26 @@ const PlayerGrid = styled.div`
   max-width:1380px;
 `;
 
-const Container = styled.div`
-  grid-column-start: 2;
-  grid-row-start: 2;
+const CentreContainer = styled.div`
+  grid-area: deck;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+`;
+
+const CardContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  justify-items: center;
+  align-items: stretch;
+  gap: 5px;
+  margin: 0 auto;
+  width: 224px;
+  height: 314px;
+  perspective: 100%;
+  max-width:1380px;
+  grid-area: ${({playerNumber}) => `player${playerNumber+1}`};
 `;
 
 const ENDPOINT = "http://localhost:4001";
@@ -73,7 +115,6 @@ const TOP_DECK = "topDeck";
 const DISCARD = "disCard";
 
 function App() {
-  const [response, setResponse] = useState("");
   const [players, setPlayers] = useState([]);
   const [selectedCards, setSelectedCards] = useState([]);
   const [transition, setTransition] = useState(false);
@@ -93,10 +134,6 @@ function App() {
   }, [flipped]);
 
   useEffect(() => {
-    socket.on("FromAPI", data => {
-      setResponse(data);
-    });
-
     socket.on('DealCards', data => {
       const { players, deck } = JSON.parse(data);
       setPlayers(players);
@@ -124,7 +161,6 @@ function App() {
   const handleStartGame = () => {
     socket.emit('StartGame');
   }
-
 
   const handleCardSelect = (cardId) => {
     if (selectingFromDeck) {
@@ -255,12 +291,11 @@ function App() {
 
   return (
     <div className="App">
-      <Button onClick={handleStartGame}>Start Game</Button>
 
-      <PlayerGrid>
+      <PlayerGrid numPlayers={players.length}>
+      {deck.length === 0 && <StartButton onClick={handleStartGame}>Start Game</StartButton>}
         {deck.length > 0 &&
-        <Container>
-
+        <CentreContainer>
           <StyledDeck>
             {/* <Deck /> */}
             <Card
@@ -283,10 +318,10 @@ function App() {
             />
           </StyledDeck>
           <Button onClick={() => setSwap(true)}>Swap</Button>
-        </Container>
+        </CentreContainer>
         }
         {players?.map((player, playerIdx) => (
-          <div className={`player-container player-${playerIdx + 1}`}>
+          <CardContainer playerNumber={playerIdx}>
             {player.cards?.map((card, index) => (
               <Card
                 saveRef={ref => saveRef(`${playerIdx}${index}`, ref)}
@@ -299,7 +334,7 @@ function App() {
                 flipped={flipped[`${playerIdx}${index}`]}
               />
             ))}
-          </div>
+          </CardContainer>
         ))}
       </PlayerGrid>
     </div>
