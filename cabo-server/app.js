@@ -47,7 +47,7 @@ io.sockets.on("connection", client => {
     });
 
     client.on("Swap", (data) => {
-        io.sockets.emit("ShowSwap", data)
+        client.broadcast.emit("ShowSwap", data)
     });
 
     interval = setInterval(() => getApiAndEmit(io.sockets), 1000);

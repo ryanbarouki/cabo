@@ -34,6 +34,7 @@ const sleep = (ms) => {
 }
 
 const TOP_DECK = "topDeck";
+const DISCARD = "disCard";
 
 function App() {
   const [response, setResponse] = useState("");
@@ -49,6 +50,14 @@ function App() {
   const transitionTime = 600;
 
   useEffect(() => {
+    console.log(flipped)
+    socket.on("ShowSwap", data => {
+      const { cardsToSwap } = JSON.parse(data);
+      handleSwap(cardsToSwap);
+    });
+  }, [flipped]);
+
+  useEffect(() => {
     socket.on("FromAPI", data => {
       setResponse(data);
     });
@@ -58,7 +67,7 @@ function App() {
       setPlayers(players);
       setDeck(deck);
       setFlipped(flipped => ({ ...flipped, [TOP_DECK]: true }));
-      setFlipped(flipped => ({ ...flipped, ["disCard"]: false }));
+      setFlipped(flipped => ({ ...flipped, [DISCARD]: false }));
       setDiscardedCard(deck[1]);
       players.forEach((player, playerId) => player.cards.forEach(
         (card, cardId) => {
@@ -67,21 +76,13 @@ function App() {
       ));
     });
 
-    socket.on("ShowSwap", data => {
-      // const {playrs} = JSON.parse(data);
-      handleSwap();
-      // setPlayers(playrs);
-    });
-
     return () => socket.disconnect();
   }, []);
 
   useEffect(() => {
     if (selectedCards.length === 2) {
-      setTransition(true);
-      handleSwap();
-      socket.emit('Swap', JSON.stringify({ players }));
-      // setSwap(false);
+      handleSwap(selectedCards);
+      socket.emit('Swap', JSON.stringify({ cardsToSwap: selectedCards }));
     }
   }, [selectedCards]);
 
@@ -125,7 +126,7 @@ function App() {
     setTransition(true);
     setFlipped(oldFlipped => ({ ...oldFlipped, [TOP_DECK]: true }));
     const topDeck = cardRefs.current[TOP_DECK];
-    const disCard = cardRefs.current["disCard"];
+    const disCard = cardRefs.current[DISCARD];
     const playerCard = cardRefs.current[cardId];
     const diffYPlayer = Math.abs(disCard.offsetTop - playerCard.offsetTop);
     const diffXPlayer = Math.abs(disCard.offsetLeft - playerCard.offsetLeft);
@@ -183,9 +184,10 @@ function App() {
     cardRef2.removeAttribute("style");
   }
 
-  const handleSwap = () => {
-    if (selectedCards.length === 0) return;
-    const [card1, card2] = selectedCards;
+  const handleSwap = (cardsToSwap) => {
+    if (cardsToSwap.length === 0) return;
+    setTransition(true);
+    const [card1, card2] = cardsToSwap;
     const [player1Id, card1Id] = card1;
     const [player2Id, card2Id] = card2;
 
@@ -242,11 +244,11 @@ function App() {
             <Card
               cardImage={cardImages[discardedCard]}
               index="01"
-              saveRef={ref => saveRef("disCard", ref)}
+              saveRef={ref => saveRef(DISCARD, ref)}
               onClick={() => { }}
               transition={transition}
               transitionTime={transitionTime}
-              flipped={flipped["disCard"]}
+              flipped={flipped[DISCARD]}
             />
           </StyledDeck>
         }
