@@ -16,16 +16,15 @@ const transformCard = (props) => {
 const CardContainer = styled.div`
     transition: ${props => props.transition ? `${props.transitionTime / 1000}s` : "0.3s"};
     transform: ${transformCard};
-    width: 100%;
-    height: 100%;
+    width: 103px;
+    height: 150px;
     border-radius: 5px;
     box-shadow: 0px 0px 5px 1px #DEDEDE;
     transform-style: preserve-3d;
     position: relative;
     cursor: pointer;
 
-    grid-column-start: ${props => props.index % 2 + 1};
-    grid-row-start: ${props => Math.floor(props.index / 2) + 1};
+    grid-area: ${({gridArea}) => gridArea};
     
     img {
         width: 100%;
@@ -44,9 +43,8 @@ const CardBackFace = styled(CardFrontFace)`
     transform: rotateY(180deg);
 `;
 
-const Card = ({ cardImage, index, onClick, saveRef, transition, transitionTime, flipped}) => {
+const Card = ({ cardImage, gridArea, onClick, saveRef, transition, transitionTime, flipped}) => {
   const [isSelected, setSelected] = useState(false)
-  const [playerIdx, cardIdx] = index;
 
   const handleClick = () => {
     onClick();
@@ -79,7 +77,7 @@ const Card = ({ cardImage, index, onClick, saveRef, transition, transitionTime, 
       onMouseLeave={handleMouseLeave}
       $rotate={flipped}
       highlight={isSelected}
-      index={cardIdx}
+      gridArea={gridArea}
       transition={transition}
       transitionTime={transitionTime}
     >

@@ -12,6 +12,8 @@ const Button = styled.button`
   border-width: 0px;
   padding: 12px;
   font-size: 0.9rem;
+  grid-area: buttons;
+  height: fit-content;
 
   :active {
     background-color: darkgray;
@@ -43,9 +45,11 @@ const StyledDeck = styled.div`
 const getLayout = (numPlayers) => {
   if (numPlayers <= 2) {
     return css`
-      grid-template-columns: repeat(3, 1fr); 
-      grid-template-rows: repeat(1, 1fr); 
-      grid-template-areas: "player1 deck player2";
+      grid-template-columns: repeat(6, 1fr); 
+      grid-template-rows: repeat(3, 1fr); 
+      grid-template-areas: "p1c1 p1c2 deck discard p2c1 p2c2"
+                           "p1c3 p1c4 buttons buttons p2c3 p2c4"
+                           "p1c5 p1c6 . . p2c5 p2c6";
     `;
   }
 
@@ -278,7 +282,7 @@ function App() {
       return players;
     });
 
-    swapCardsOnDOM(card1, card2);
+    // swapCardsOnDOM(card1, card2);
     setSelectedCards([]);
 
     setTimeout(() => {
@@ -293,46 +297,42 @@ function App() {
     <PlayerGrid numPlayers={players.length}>
       {deck.length === 0 && <StartButton onClick={handleStartGame}>Start Game</StartButton>}
       {deck.length > 0 &&
-        <CentreContainer>
-          <StyledDeck>
-            {/* <Deck /> */}
-            <Card
-              cardImage={cardImages[deck[0]]}
-              index="00"
-              saveRef={ref => saveRef(TOP_DECK, ref)}
-              onClick={() => handleCardSelect(TOP_DECK)}
-              transition={transition}
-              transitionTime={transitionTime}
-              flipped={flipped[TOP_DECK]}
-            />
-            <Card
-              cardImage={cardImages[discardedCard]}
-              index="01"
-              saveRef={ref => saveRef(DISCARD, ref)}
-              onClick={() => { }}
-              transition={transition}
-              transitionTime={transitionTime}
-              flipped={flipped[DISCARD]}
-            />
-          </StyledDeck>
+        <>
+          {/* <Deck /> */}
+          <Card
+            cardImage={cardImages[deck[0]]}
+            gridArea="deck"
+            saveRef={ref => saveRef(TOP_DECK, ref)}
+            onClick={() => handleCardSelect(TOP_DECK)}
+            transition={transition}
+            transitionTime={transitionTime}
+            flipped={flipped[TOP_DECK]}
+          />
+          <Card
+            cardImage={cardImages[discardedCard]}
+            gridArea="discard"
+            saveRef={ref => saveRef(DISCARD, ref)}
+            onClick={() => { }}
+            transition={transition}
+            transitionTime={transitionTime}
+            flipped={flipped[DISCARD]}
+          />
           <Button onClick={() => setSwap(true)}>Swap</Button>
-        </CentreContainer>
+        </>
       }
       {players?.map((player, playerIdx) => (
-        <CardContainer key={playerIdx} playerNumber={playerIdx}>
-          {player.cards?.map((card, index) => (
-            <Card
-              saveRef={ref => saveRef(`${playerIdx}${index}`, ref)}
-              cardImage={cardImages[card]}
-              index={`${playerIdx}${index}`}
-              key={`${playerIdx}${index}`}
-              onClick={() => handleCardSelect(`${playerIdx}${index}`)}
-              transition={transition}
-              transitionTime={transitionTime}
-              flipped={flipped[`${playerIdx}${index}`]}
-            />
-          ))}
-        </CardContainer>
+        player.cards?.map((card, cardIndex) => (
+          <Card
+            saveRef={ref => saveRef(`${playerIdx}${cardIndex}`, ref)}
+            cardImage={cardImages[card]}
+            gridArea={`p${playerIdx + 1}c${cardIndex + 1}`}
+            key={`${playerIdx}${cardIndex}`}
+            onClick={() => handleCardSelect(`${playerIdx}${cardIndex}`)}
+            transition={transition}
+            transitionTime={transitionTime}
+            flipped={flipped[`${playerIdx}${cardIndex}`]}
+          />
+        ))
       ))}
     </PlayerGrid>
   );
