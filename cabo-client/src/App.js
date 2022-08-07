@@ -127,6 +127,7 @@ function App() {
   const [flipped, setFlipped] = useState({});
   const [selectingFromDeck, setSelectingFromDeck] = useState(false);
   const cardRefs = useRef({});
+  const [cardPositions, setCardPositions] = useState({});
   const transitionTime = 600;
 
   useEffect(() => {
@@ -158,6 +159,13 @@ function App() {
     if (selectedCards.length === 2) {
       handleSwap(selectedCards);
       socket.emit('Swap', JSON.stringify({ cardsToSwap: selectedCards }));
+
+      // console.log(cardPositions)
+      // for (const card in cardRefs.current) {
+      //   setCardPositions(cardPositions => ({
+      //     ...cardPositions, [card]: {x: cardRefs.current[card].offsetLeft, y: cardRefs.current[card].offsetTop}
+      //   }));
+      // }
     }
   }, [selectedCards]);
 
@@ -244,19 +252,23 @@ function App() {
   const swapCardsOnDOM = (card1, card2) => {
     const cardRef1 = cardRefs.current[card1];
     const cardRef2 = cardRefs.current[card2];
+
     const diffY = Math.abs(cardRef1.offsetTop - cardRef2.offsetTop);
     const diffX = Math.abs(cardRef1.offsetLeft - cardRef2.offsetLeft);
 
     const diffY1 = cardRef1.offsetTop > cardRef2.offsetTop ? -diffY : diffY;
     const diffX1 = cardRef1.offsetLeft > cardRef2.offsetLeft ? -diffX : diffX;
+    setCardPositions(cardPositions => ({...cardPositions, 
+                                        [card1]: {x: diffX, y: diffY},
+                                        [card2]: {x: diffX1, y: diffY1}}));
 
-    cardRef1.setAttribute("style", cardAnimationStyle(diffX1, diffY1, flipped[card1]));
-    cardRef2.setAttribute("style", cardAnimationStyle(-diffX1, -diffY1, flipped[card2]));
+    // cardRef1.setAttribute("style", cardAnimationStyle(diffX1, diffY1, flipped[card1]));
+    // cardRef2.setAttribute("style", cardAnimationStyle(-diffX1, -diffY1, flipped[card2]));
 
-    setTimeout(() => {
-      cardRef1.removeAttribute("style");
-      cardRef2.removeAttribute("style");
-    }, 50);
+    // setTimeout(() => {
+    //   cardRef1.removeAttribute("style");
+    //   cardRef2.removeAttribute("style");
+    // }, 50);
   }
 
   const handleSwap = (cardsToSwap) => {
@@ -282,7 +294,7 @@ function App() {
       return players;
     });
 
-    // swapCardsOnDOM(card1, card2);
+    swapCardsOnDOM(card1, card2);
     setSelectedCards([]);
 
     setTimeout(() => {
@@ -331,6 +343,7 @@ function App() {
             transition={transition}
             transitionTime={transitionTime}
             flipped={flipped[`${playerIdx}${cardIndex}`]}
+            position={cardPositions[`${playerIdx}${cardIndex}`]}
           />
         ))
       ))}

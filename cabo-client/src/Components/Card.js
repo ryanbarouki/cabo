@@ -3,6 +3,7 @@ import { useState } from 'react';
 import back from '../cards/back.svg';
 import { socket } from '../App.js';
 import styled from 'styled-components';
+import { motion } from 'framer-motion'
 
 const transformCard = (props) => {
   let transform = "";
@@ -13,7 +14,7 @@ const transformCard = (props) => {
   return transform;
 }
 
-const CardContainer = styled.div`
+const CardContainer = styled(motion.div)`
     transition: ${props => props.transition ? `${props.transitionTime / 1000}s` : "0.3s"};
     transform: ${transformCard};
     width: 103px;
@@ -43,7 +44,7 @@ const CardBackFace = styled(CardFrontFace)`
     transform: rotateY(180deg);
 `;
 
-const Card = ({ cardImage, gridArea, onClick, saveRef, transition, transitionTime, flipped}) => {
+const Card = ({ cardImage, gridArea, onClick, saveRef, transition, transitionTime, flipped, position}) => {
   const [isSelected, setSelected] = useState(false)
 
   const handleClick = () => {
@@ -70,24 +71,25 @@ const Card = ({ cardImage, gridArea, onClick, saveRef, transition, transitionTim
   }, []);
 
   return (
-    <CardContainer
-      ref={ref => saveRef(ref)}
-      onClick={handleClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      $rotate={flipped}
-      highlight={isSelected}
-      gridArea={gridArea}
-      transition={transition}
-      transitionTime={transitionTime}
-    >
-      <CardFrontFace>
-        <img src={cardImage} alt="card" />
-      </CardFrontFace>
-      <CardBackFace>
-        <img src={back} alt="card" />
-      </CardBackFace>
-    </CardContainer>
+      <CardContainer
+        ref={ref => saveRef(ref)}
+        onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        $rotate={flipped}
+        highlight={isSelected}
+        gridArea={gridArea}
+        transition={transition}
+        transitionTime={transitionTime}
+        animate={position}
+      >
+        <CardFrontFace>
+          <img src={cardImage} alt="card" />
+        </CardFrontFace>
+        <CardBackFace>
+          <img src={back} alt="card" />
+        </CardBackFace>
+      </CardContainer>
   )
 }
 
